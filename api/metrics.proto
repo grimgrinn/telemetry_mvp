@@ -4,7 +4,7 @@ package metrics;
 
 option go_package = "/api";
 
-service MetricsSerivce {
+service MetricsService {
     rpc SendMetrics (MetricRequest) returns (MetricResponse);
 }
 

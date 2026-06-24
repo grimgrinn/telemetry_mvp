@@ -200,7 +200,7 @@ const file_api_metrics_proto_rawDesc = "" +
 	"\x0eMetricResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage2P\n" +
-	"\x0eMetricsSerivce\x12>\n" +
+	"\x0eMetricsService\x12>\n" +
 	"\vSendMetrics\x12\x16.metrics.MetricRequest\x1a\x17.metrics.MetricResponseB\x06Z\x04/apib\x06proto3"
 
 var (
@@ -223,8 +223,8 @@ var file_api_metrics_proto_goTypes = []any{
 }
 var file_api_metrics_proto_depIdxs = []int32{
 	0, // 0: metrics.MetricRequest.metric:type_name -> metrics.Metric
-	1, // 1: metrics.MetricsSerivce.SendMetrics:input_type -> metrics.MetricRequest
-	2, // 2: metrics.MetricsSerivce.SendMetrics:output_type -> metrics.MetricResponse
+	1, // 1: metrics.MetricsService.SendMetrics:input_type -> metrics.MetricRequest
+	2, // 2: metrics.MetricsService.SendMetrics:output_type -> metrics.MetricResponse
 	2, // [2:3] is the sub-list for method output_type
 	1, // [1:2] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
