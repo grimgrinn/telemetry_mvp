@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"log"
 	"net"
 
@@ -10,12 +9,15 @@ import (
 
 	_ "github.com/lib/pq"
 
+	"telemetry_mvp/config"
+	"telemetry_mvp/repository"
+
 	"google.golang.org/grpc"
 )
 
 type server struct {
 	pb.UnimplementedMetricsServiceServer
-	db *sql.DB
+	repo *repository.MetricRepository
 }
 
 func (s *server) SendMetrics(ctx context.Context, req *pb.MetricRequest) (*pb.MetricResponse, error) {
@@ -23,11 +25,7 @@ func (s *server) SendMetrics(ctx context.Context, req *pb.MetricRequest) (*pb.Me
 
 	log.Printf("[Получено] Устройство: %s, Значение: %f, Тип: %s", metric.DeviceId, metric.Value, metric.Type)
 
-	// database
-	_, err := s.db.ExecContext(ctx,
-		"INSERT INTO metrics (device_id, timestamp, value, type) VALUES ($1, $2, $3, $4)",
-		metric.DeviceId, metric.Timestamp, metric.Value, metric.Type)
-	if err != nil {
+	if err := s.repo.Save(ctx, metric); err != nil {
 		log.Printf("DB error: %v", err)
 		return &pb.MetricResponse{Success: false, Message: "DB error"}, nil
 	}
@@ -36,37 +34,24 @@ func (s *server) SendMetrics(ctx context.Context, req *pb.MetricRequest) (*pb.Me
 }
 
 func main() {
-	// db
-	connStr := "postgres://user:pass@localhost:5432/telemetry?sslmode=disable"
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		log.Fatalf("Failed to connect to DB: %v", err)
-	}
-	defer db.Close()
+	cfg := config.Load()
+	log.Printf("Config loaded: port=%s, log_level=%s", cfg.ServerPort, cfg.LogLevel)
 
-	// table
-	_, err = db.Exec(`
-		CREATE TABLE IF NOT EXISTS metrics (
-			id SERIAL PRIMARY KEY,
-			device_id TEXT,
-			timestamp BIGINT,
-			value FLOAT,
-			type  TEXt
-		);
-	`)
+	repo, err := repository.NewMetricRepository(cfg.DBConn)
 	if err != nil {
-		log.Fatalf("Failed to creat table: %v", err)
+		log.Fatalf("Failed to create repository: %v", err)
 	}
-	log.Println("DB connected and table ready")
+	defer repo.Close()
+	log.Printf("DB conneceted and talbe ready, %v", cfg.DBConn)
 
-	lis, err := net.Listen("tcp", ":50051")
+	lis, err := net.Listen("tcp", ":"+cfg.ServerPort)
 	if err != nil {
 		log.Fatalf("Не удалось запустить сервер: %v", err)
 	}
 
 	grpcServer := grpc.NewServer()
 
-	pb.RegisterMetricsServiceServer(grpcServer, &server{db: db})
+	pb.RegisterMetricsServiceServer(grpcServer, &server{repo: repo})
 
 	log.Println("gRPC сервер запущен на порту :50051")
 	if err := grpcServer.Serve(lis); err != nil {

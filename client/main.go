@@ -24,8 +24,8 @@ func main() {
 		Metric: &pb.Metric{
 			DeviceId:  "sensor-001",
 			Timestamp: time.Now().Unix(),
-			Value:     366,
-			Type:      "temperature",
+			Value:     10.99,
+			Type:      "vibration",
 		},
 	}
 
