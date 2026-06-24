@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package metrics;
+
+option go_package = "/api";
+
+service MetricsSerivce {
+    rpc SendMetrics (MetricRequest) returns (MetricResponse);
+}
+
+message Metric {
+    string device_id = 1;
+    int64 timestamp = 2;
+    float value = 3;
+    string type = 4; // temperature, pressure, vibration
+}
+
+message MetricRequest {
+    Metric metric = 1;
+}
+
+message MetricResponse {
+    bool success = 1;
+    string message = 2;
+}
