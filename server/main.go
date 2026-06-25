@@ -42,7 +42,7 @@ func main() {
 		log.Fatalf("Failed to create repository: %v", err)
 	}
 	defer repo.Close()
-	log.Printf("DB conneceted and talbe ready, %v", cfg.DBConn)
+	log.Println("DB conneceted and talbe ready")
 
 	lis, err := net.Listen("tcp", ":"+cfg.ServerPort)
 	if err != nil {

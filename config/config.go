@@ -9,20 +9,24 @@ import (
 )
 
 type Config struct {
-	ServerPort string
-	DBConn     string
-	LogLevel   string
+	ServerPort  string
+	DBConn      string
+	LogLevel    string
+	KafkaBroker string
 }
 
 // Load загружает конфигурацию из переменных окружения
 // если переменная не задана - использует значение по умолчанию
 func Load() *Config {
-	godotenv.Load()
+	if err := godotenv.Load(); err != nil {
+		log.Println(".env file not found, using system env")
+	}
 
 	cfg := &Config{
-		ServerPort: getEnv("SERVER_PORT", "50051"),
-		DBConn:     getEnv("DB_CONN", ""),
-		LogLevel:   getEnv("LOG_LEVEL", "info"),
+		ServerPort:  getEnv("SERVER_PORT", "50051"),
+		DBConn:      getEnv("DB_CONN", ""),
+		LogLevel:    getEnv("LOG_LEVEL", "info"),
+		KafkaBroker: getEnv("KAFKA_BROKER", "localhost:9092"),
 	}
 
 	if cfg.DBConn == "" {
