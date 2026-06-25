@@ -11,6 +11,7 @@ import (
 	"telemetry_mvp/config"
 
 	"github.com/IBM/sarama"
+	_ "github.com/lib/pq"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -19,7 +20,7 @@ func main() {
 
 	db, err := sql.Open("postgres", cfg.DBConn)
 	if err != nil {
-		log.Fatal("DB error: %v", err)
+		log.Fatalf("DB error: %v", err)
 	}
 	defer db.Close()
 
@@ -30,7 +31,7 @@ func main() {
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS metrics (
 			id SERIAL PRIMARY KEY,
-			device_id TEXT
+			device_id TEXT,
 			timestamp BIGINT,
 			value FLOAT,
 			type TEXT
@@ -58,7 +59,7 @@ func main() {
 	}
 	defer partitionConsumer.Close()
 
-	log.Println("Consumer starred. Waitiing for messages...")
+	log.Println("Consumer started. Waiting for messages...")
 
 	// process messages
 	ctx, cancel := context.WithCancel(context.Background())
